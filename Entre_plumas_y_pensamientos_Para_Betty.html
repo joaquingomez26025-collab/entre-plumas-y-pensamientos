@@ -1,0 +1,1956 @@
+<!doctype html>
+<html lang="es"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxMTE4MjkyNDI0NTc3MzE0MDc5MSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2QzNGQyYjI3NGI3Yzk0NzhfaW5kZXguaHRtbC04NzMifSwiZXhwIjoxNzk0NTU2MTM3LCJpYXQiOjE3OTQ1NTI1MzcsImFsZyI6IlJTMjU2In0.IVWzs-4ceLHwAF2eW1B2SeTOwVDuI7THdwlPequl6maBS7tZe4bu261yizld_tKK0GFu1TdF95AsM4XrgcDB_uJTpfOjCAXUa-14RPBgxAnCxwKMNv8sUQFNSReT99VB-5ciIHP8iAILcncewE-dnt_7Sm8IPyMFcFgG4ayBVTDnZARhUBzGrBgcKr2m7sgPyJRDdiJSd4LCpKp_FADzoUKFZcaEbdmt5NmvFR29QhIRY0bbL_jq0ex_cmgTREos1vQhMIg_EPen5zbvK9V3afKRMFN_axwAXrFoCHOKvc6xPlEss7zYiYnBwwcMWhxix9ei1W_RNfiXPVxfGm6-HQ","c_d34d2b274b7c9478_index.html-873")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4efe6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&amp;family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&amp;display=swap" rel="stylesheet">
+<title>Entre plumas y pensamientos — Para Betty</title>
+<style>
+:root {
+  --paper:#fffdf8;
+  --ink:#3e4145;
+  --muted:#85827b;
+  --gold:#b69a60;
+  --gold2:#d8c69d;
+  --blue:#8c9da5;
+  --bg:#e9e4dc;
+}
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  margin:0;
+  min-height:100vh;
+  min-height:100dvh;
+  background:radial-gradient(ellipse at 50% 12%,#fffdf8 0,#eee9e0 48%,#ddd8d0 100%);
+  color:var(--ink);
+  font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:18px 14px 16px;
+  overscroll-behavior-y:contain;
+}
+.topline {
+  font:11px/1.4 Arial,sans-serif;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:#9b8c70;
+  margin-bottom:12px;
+  text-align:center;
+}
+.stage {
+  width:min(100%,850px);
+  perspective:1800px;
+  position:relative;
+}
+.book {
+  position:relative;
+  width:100%;
+  height:min(70dvh,620px);
+  min-height:480px;
+  transform-style:preserve-3d;
+  filter:drop-shadow(0 22px 24px #6f625022);
+}
+.progress-track {
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:#efe8da;
+  z-index:20;
+  border-radius:4px 12px 0 0;
+  overflow:hidden;
+}
+.progress-fill {
+  height:100%;
+  width:4.76%;
+  background:linear-gradient(90deg,var(--gold2),var(--gold));
+  transition:width .45s cubic-bezier(.2,.72,.22,1);
+}
+.page {
+  position:absolute;
+  inset:0;
+  background:var(--paper);
+  border:1px solid #e7dfd0;
+  border-radius:4px 12px 12px 4px;
+  overflow:hidden;
+  transform-origin:left center;
+  backface-visibility:hidden;
+  transition:transform .72s cubic-bezier(.2,.72,.22,1),opacity .72s;
+  box-shadow:inset 15px 0 24px -24px #5c4e32;
+}
+.page:before {
+  content:"";
+  position:absolute;
+  left:18px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:linear-gradient(transparent,#e7dfd0 12%,#e7dfd0 88%,transparent);
+  opacity:.75;
+  z-index:5;
+  pointer-events:none;
+}
+.page.turn {
+  transform:rotateY(-180deg);
+  opacity:.2;
+}
+.page-inner {
+  height:100%;
+  padding:clamp(34px,7vw,74px) clamp(32px,9vw,100px) 58px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  position:relative;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
+}
+.page-inner::-webkit-scrollbar {
+  width:4px;
+}
+.page-inner::-webkit-scrollbar-thumb {
+  background:#dfd5c3;
+  border-radius:4px;
+}
+
+/* Difuminado inferior sutil cuando la página tiene scroll */
+.scroll-fade {
+  position:absolute;
+  left:1px;
+  right:1px;
+  bottom:38px;
+  height:36px;
+  background:linear-gradient(to bottom,rgba(255,253,248,0),rgba(255,253,248,.96));
+  pointer-events:none;
+  z-index:12;
+  opacity:0;
+  transition:opacity .25s ease;
+}
+.scroll-fade.visible {
+  opacity:1;
+}
+.scroll-hint {
+  position:absolute;
+  bottom:42px;
+  left:50%;
+  transform:translateX(-50%);
+  font:9px Arial,sans-serif;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#b19a6c;
+  background:rgba(255,253,248,.9);
+  padding:2px 8px;
+  border-radius:10px;
+  pointer-events:none;
+  z-index:13;
+  opacity:0;
+  transition:opacity .25s ease;
+}
+.scroll-hint.visible {
+  opacity:.88;
+}
+
+/* Áreas táctiles laterales para pasar página con un toque */
+.tap-zone {
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:15%;
+  max-width:68px;
+  z-index:15;
+  cursor:pointer;
+}
+.tap-zone.left { left:0; }
+.tap-zone.right { right:0; }
+
+/* Florituras botánicas doradas */
+.page-inner:before,
+.page-inner:after {
+  position:absolute;
+  z-index:0;
+  pointer-events:none;
+  color:#b69a60;
+  opacity:.26;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-style:italic;
+  line-height:1;
+}
+.page-inner:before {
+  content:"❧";
+  top:13px;
+  right:22px;
+  font-size:36px;
+  transform:rotate(12deg);
+}
+.page-inner:after {
+  content:"❦";
+  bottom:12px;
+  left:22px;
+  font-size:27px;
+  transform:rotate(-18deg);
+  opacity:.19;
+}
+.page-inner>* {
+  position:relative;
+  z-index:1;
+}
+.page-inner.cover:before {
+  content:"❦";
+  top:24px;
+  right:30px;
+  font-size:42px;
+  opacity:.32;
+  transform:rotate(15deg);
+}
+.page-inner.cover:after {
+  content:"❧";
+  bottom:25px;
+  left:30px;
+  font-size:38px;
+  opacity:.25;
+  transform:rotate(-20deg);
+}
+.page-inner.cover {
+  background:linear-gradient(145deg,#fffefa,#f5f0e7);
+}
+.kicker {
+  font:10px Arial,sans-serif;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:20px;
+}
+h1 {
+  font-family:'Caveat','Segoe Print','Bradley Hand',cursive;
+  font-size:clamp(43px,7vw,72px);
+  font-weight:500;
+  line-height:.98;
+  letter-spacing:.005em;
+  margin:0 0 18px;
+  color:#55534d;
+}
+h2 {
+  font-family:'Caveat','Segoe Print','Bradley Hand',cursive;
+  font-size:clamp(34px,5vw,47px);
+  font-weight:500;
+  line-height:1.03;
+  margin:0 0 20px;
+  color:#59574f;
+}
+.subtitle {
+  font-style:italic;
+  color:#8e877a;
+  font-size:clamp(15px,2vw,19px);
+  margin:0 0 38px;
+}
+.author {
+  font:11px Arial,sans-serif;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#9a8c70;
+  margin:7px 0 3px;
+}
+.quote-wrap {
+  width:min(100%,590px);
+  margin:0 auto 8px;
+  padding:15px 24px 12px;
+  border-left:1px solid #d8c69f;
+  border-right:1px solid #eee6d7;
+  background:linear-gradient(90deg,#faf7f0,#fffdf9 48%,#faf7f0);
+}
+.quote {
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:clamp(20px,2.65vw,27px);
+  line-height:1.42;
+  font-weight:500;
+  font-style:italic;
+  color:#71674f;
+  max-width:540px;
+  margin:0 auto 9px;
+}
+.source {
+  font:italic 13px 'Cormorant Garamond',Georgia,serif;
+  letter-spacing:.025em;
+  color:#a39a88;
+  margin:0 0 4px;
+}
+.reflection-label {
+  font:9px Arial,sans-serif;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:#b19a6c;
+  margin:0 0 9px;
+}
+.bodycopy {
+  font-family:'Caveat','Segoe Print','Bradley Hand',cursive;
+  font-size:clamp(19px,2.2vw,23px);
+  line-height:1.48;
+  max-width:620px;
+  color:#55565a;
+  text-align:left;
+  white-space:pre-line;
+}
+.bodycopy.center { text-align:center; }
+.closing {
+  font-family:'Caveat','Segoe Print','Bradley Hand',cursive;
+  font-size:clamp(21px,2.5vw,26px);
+  font-style:normal;
+  color:#8b7d60;
+  margin-top:25px;
+  line-height:1.35;
+}
+.page-no {
+  position:absolute;
+  bottom:16px;
+  left:0;
+  right:0;
+  text-align:center;
+  font:10px Arial,sans-serif;
+  letter-spacing:.2em;
+  color:#b1a58f;
+  background:linear-gradient(to top,var(--paper) 65%,rgba(255,253,248,0));
+  padding-top:8px;
+  z-index:14;
+  pointer-events:none;
+}
+.page-inner:not(.cover) {
+  justify-content:flex-start;
+  padding-top:clamp(28px,5vw,52px);
+}
+.page-inner:not(.cover) .swan.small {
+  margin-bottom:10px;
+}
+.page-inner:not(.cover) .kicker {
+  margin-bottom:10px;
+}
+.page-inner:not(.cover) .ornament {
+  margin:13px auto 15px;
+}
+.swan {
+  width:clamp(90px,15vw,145px);
+  height:auto;
+  margin:0 auto 26px;
+  opacity:.9;
+}
+.swan.small {
+  width:55px;
+  margin:0 auto 17px;
+}
+.ornament {
+  width:92px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold2),transparent);
+  margin:23px auto;
+  position:relative;
+}
+.ornament:after {
+  content:"✿";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-54%);
+  padding:0 7px;
+  background:var(--paper);
+  color:#c3aa75;
+  font:10px Georgia,serif;
+  opacity:.72;
+}
+.controls {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+  width:min(100%,850px);
+  position:relative;
+}
+.ctrl {
+  border:1px solid #d8cdb8;
+  background:#fbf8f1;
+  color:#76694e;
+  border-radius:30px;
+  padding:11px 16px;
+  min-height:42px;
+  font:11px Arial,sans-serif;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:background .2s, border-color .2s, transform .1s;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  user-select:none;
+}
+.ctrl:active:not(:disabled) {
+  transform:scale(.97);
+}
+.ctrl:hover {
+  background:#eee5d4;
+  border-color:#bda779;
+}
+.ctrl:disabled {
+  opacity:.35;
+  cursor:default;
+}
+.save-wrap {
+  position:relative;
+  display:inline-flex;
+}
+.save-menu {
+  position:absolute;
+  bottom:calc(100% + 8px);
+  right:0;
+  min-width:225px;
+  background:#fffdf8;
+  border:1px solid #d8cdb8;
+  border-radius:14px;
+  padding:6px;
+  box-shadow:0 12px 28px rgba(92,78,50,.16);
+  display:none;
+  flex-direction:column;
+  gap:4px;
+  z-index:50;
+}
+.save-menu.open {
+  display:flex;
+}
+.save-option {
+  border:none;
+  background:transparent;
+  color:#59574f;
+  text-align:left;
+  padding:10px 12px;
+  border-radius:9px;
+  cursor:pointer;
+  font:12px/1.3 'Cormorant Garamond',Georgia,serif;
+  transition:background .15s;
+}
+.save-option strong {
+  display:block;
+  font:600 10px/1.2 Arial,sans-serif;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#76694e;
+  margin-bottom:2px;
+}
+.save-option:hover, .save-option:active {
+  background:#f3ede0;
+}
+.counter {
+  font:11px Arial,sans-serif;
+  color:#8c877e;
+  letter-spacing:.12em;
+  min-width:58px;
+  text-align:center;
+}
+.hint {
+  font:11px Arial,sans-serif;
+  color:#a09a90;
+  margin-top:11px;
+  text-align:center;
+  padding:0 10px;
+}
+.bottom {
+  font:10px Arial,sans-serif;
+  color:#a49b8d;
+  letter-spacing:.12em;
+  margin-top:14px;
+  text-align:center;
+}
+@media(max-width:600px) {
+  body { padding:10px 8px 12px; justify-content:space-between; }
+  .topline { font-size:10px; margin-bottom:8px; }
+  .book { height:calc(100dvh - 185px); min-height:420px; max-height:660px; }
+  .page-inner { padding:26px 22px 54px; }
+  .page-inner:not(.cover) { padding-top:22px; }
+  .bodycopy { font-size:clamp(19px,5.1vw,21px); line-height:1.42; }
+  .quote-wrap { padding:11px 14px 9px; }
+  .quote { font-size:clamp(19px,5.2vw,22px); }
+  .page:before { left:10px; }
+  .controls { gap:8px; margin-top:12px; }
+  .ctrl { padding:10px 13px; font-size:10px; letter-spacing:.09em; }
+  .save-menu { right:50%; transform:translateX(50%); min-width:235px; }
+  .hint { font-size:10px; margin-top:8px; }
+  .bottom { margin-top:8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .page, .progress-fill { transition:none; }
+}
+</style>
+</head>
+<body>
+<div class="topline">Un pequeño refugio de palabras</div>
+<main class="stage" aria-label="Libro digital Entre plumas y pensamientos">
+  <div class="book" id="book">
+    <article class="page" id="page">
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="progressFill" style="width: 4.7619%;"></div>
+      </div>
+      <div class="tap-zone left" id="tapLeft" title="Página anterior" aria-hidden="true"></div>
+      <div class="tap-zone right" id="tapRight" title="Página siguiente" aria-hidden="true"></div>
+      <div class="page-inner" id="pageContent">
+      <div class="page-inner cover">
+        <svg class="swan" viewBox="0 0 180 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Cisne minimalista dorado">
+<path d="M25 112c30 7 63 7 91-2 16-5 29-15 34-30 4-13-2-23-12-25-10-2-18 6-20 16-2 9 4 16 12 17 7 1 13-3 16-9" stroke="#B69A60" stroke-width="2.1" stroke-linecap="round"></path>
+<path d="M117 80c-9-15-24-28-43-33-13-3-25 1-31 10-5 8-2 17 6 21 8 4 17 1 21-6 3-6 1-12-4-16" stroke="#B69A60" stroke-width="2.1" stroke-linecap="round"></path>
+<path d="M145 55l14-5-10 10" stroke="#B69A60" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M27 121c34 9 82 8 119-5" stroke="#D8C69D" stroke-width="1.2" stroke-linecap="round"></path>
+<path d="M43 133c28 5 55 5 81-1" stroke="#D8C69D" stroke-width="1" stroke-linecap="round"></path>
+</svg>
+<div class="kicker">Un pequeño refugio de palabras</div>
+<h1>Entre plumas<br>y pensamientos</h1>
+<div class="ornament"></div>
+<p class="subtitle">Para Beatriz, Betty</p>
+<p class="closing">Hay palabras que no buscan ser leídas una sola vez,<br>sino encontrar un lugar al que regresar.</p>
+        <div class="page-no">01</div>
+      </div></div>
+      <div class="scroll-fade" id="scrollFade" aria-hidden="true"></div>
+      <div class="scroll-hint" id="scrollHint" aria-hidden="true">Desliza ↓</div>
+    </article>
+  </div>
+</main>
+<nav class="controls" aria-label="Controles del libro">
+  <button class="ctrl" id="prev" type="button" disabled="">← Anterior</button>
+  <span class="counter" id="counter">01 / 21</span>
+  <button class="ctrl" id="next" type="button">Siguiente →</button>
+  <button class="ctrl" id="music" type="button" aria-pressed="false">♫ Música: apagada</button>
+  <div class="save-wrap">
+    <button class="ctrl" id="saveBtn" type="button" aria-expanded="false" aria-haspopup="true">↓ Guardar</button>
+    <div class="save-menu" id="saveMenu" role="menu">
+      <button class="save-option" id="downloadHtml" type="button" role="menuitem">
+        <strong>Libro web sin internet (.html)</strong>
+        Conserva el diseño, animaciones y música
+      </button>
+      <button class="save-option" id="downloadTxt" type="button" role="menuitem">
+        <strong>Texto completo para leer (.txt)</strong>
+        Formato limpio para guardar o imprimir
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="hint">Desliza a los lados, toca los bordes o usa las flechas para pasar página.</div>
+<div class="bottom">HECHO CON CARIÑO · PARA BETTY</div>
+<script>
+const swan=`<svg class="swan" viewBox="0 0 180 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Cisne minimalista dorado">
+<path d="M25 112c30 7 63 7 91-2 16-5 29-15 34-30 4-13-2-23-12-25-10-2-18 6-20 16-2 9 4 16 12 17 7 1 13-3 16-9" stroke="#B69A60" stroke-width="2.1" stroke-linecap="round"/>
+<path d="M117 80c-9-15-24-28-43-33-13-3-25 1-31 10-5 8-2 17 6 21 8 4 17 1 21-6 3-6 1-12-4-16" stroke="#B69A60" stroke-width="2.1" stroke-linecap="round"/>
+<path d="M145 55l14-5-10 10" stroke="#B69A60" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M27 121c34 9 82 8 119-5" stroke="#D8C69D" stroke-width="1.2" stroke-linecap="round"/>
+<path d="M43 133c28 5 55 5 81-1" stroke="#D8C69D" stroke-width="1" stroke-linecap="round"/>
+</svg>`;
+const pages=[
+{
+type:'cover',
+html:`${swan}
+<div class="kicker">Un pequeño refugio de palabras</div>
+<h1>Entre plumas<br>y pensamientos</h1>
+<div class="ornament"></div>
+<p class="subtitle">Para Beatriz, Betty</p>
+<p class="closing">Hay palabras que no buscan ser leídas una sola vez,<br>sino encontrar un lugar al que regresar.</p>`
+},
+{
+title:'A quien encuentre estas palabras',
+html:`Hay regalos que caben en una caja, otros que se envuelven con papel y algunos que no necesitan más que un puñado de palabras.
+
+Este pequeño libro pertenece a los últimos.
+
+No pretende enseñarte cómo vivir, decirte qué camino tomar ni ofrecer respuestas a todas esas preguntas que a veces aparecen sin avisar. Tampoco tiene la intención de explicarte el mundo.
+
+Simplemente reúne pensamientos, versos y pequeñas reflexiones que, de alguna manera, merecen ser compartidos.
+
+Quizá encuentres aquí una frase que te haga sonreír, una idea que te acompañe durante un día complicado o unas palabras que quieras volver a leer cuando el tiempo te lleve a otro lugar.
+
+No importa si lo lees de principio a fin o si alguna vez lo abres al azar.
+
+Me gustaría que estas páginas fueran como el agua tranquila de un lago: un lugar donde detenerse un instante, respirar y recordar que incluso en medio del movimiento siempre puede existir un poco de serenidad.
+
+Con cariño, para ti.`
+},
+{
+title:'Una belleza que no necesita explicarse',
+html:`Hay personas que poseen una manera particular de estar en el mundo.
+
+No necesariamente hacen ruido, no siempre buscan llamar la atención y quizá ni siquiera se dan cuenta de lo que transmiten. Sin embargo, dejan algo en quienes coinciden con ellas: una impresión agradable, un recuerdo o esa sensación de haber encontrado una presencia que vale la pena conservar.
+
+A veces, la belleza de alguien no está en lo que muestra, sino en aquello que permanece después de conocerlo.
+
+Por eso pensé en los cisnes.
+
+Su elegancia no depende de demostrar nada. Se deslizan sobre el agua sin necesitar aplausos, y debajo de esa calma existe un movimiento constante que casi nunca vemos.
+
+Tal vez también nosotros seamos un poco así: hay mucho más sucediendo dentro de cada persona de lo que el mundo alcanza a observar.
+
+Y quizá esa sea una de las formas más bonitas de existir: ser auténticos, incluso cuando nadie está mirando.`
+},
+{
+title:'Cultivar la bondad',
+author:'José Martí',
+quote:'«Cultivo una rosa blanca, en julio como en enero, para el amigo sincero que me da su mano franca».',
+source:'Versos sencillos, XXXIX.',
+html:`Una rosa blanca no pregunta quién merece recibirla. Simplemente florece.
+
+Hay una bondad que no necesita grandes demostraciones: aparece en un gesto, en una conversación, en una mano que se extiende sin esperar nada a cambio.
+
+Quizá por eso la amistad verdadera se parece tanto a un jardín. No se construye con promesas extraordinarias, sino con pequeños cuidados que, con el tiempo, terminan echando raíces.
+
+Y aunque no todas las personas permanezcan para siempre, algunas dejan flores en nuestra memoria que ninguna distancia consigue marchitar.`
+},
+{
+title:'Los caminos que nos inventan',
+author:'Antonio Machado',
+quote:'«Caminante, no hay camino, se hace camino al andar».',
+source:'Proverbios y cantares, XXIX.',
+html:`Qué curioso es pensar que pasamos buena parte de la vida buscando caminos, como si en algún lugar existiera un mapa con todas las respuestas.
+
+Pero la vida no siempre funciona así.
+
+Hay decisiones que tomamos sin conocer el resultado, despedidas que nos llevan hacia lugares inesperados y comienzos que jamás habríamos imaginado.
+
+Quizá no se trate de encontrar el camino perfecto, sino de comprender que cada paso también forma parte de nuestra historia.
+
+Incluso los desvíos tienen algo que enseñarnos. A veces, aquello que parecía alejarnos de nuestro destino termina acercándonos a una versión de nosotros mismos que todavía no conocíamos.`
+},
+{
+title:'La esperanza tiene plumas',
+author:'Emily Dickinson',
+quote:'«La esperanza es esa cosa con plumas que se posa en el alma».',
+source:'Traducción propia del inicio de “Hope is the thing with feathers”.',
+html:`La esperanza no siempre llega como una gran noticia ni como una certeza capaz de despejar todas las dudas.
+
+A veces es pequeña. Tan pequeña que apenas podemos reconocerla.
+
+Es esa parte de nosotros que todavía imagina algo bonito después de un día difícil. La que nos permite abrir la ventana, volver a intentarlo o simplemente creer que mañana puede sentirse diferente.
+
+Dickinson la imaginó como un ave que permanece cantando incluso durante la tormenta.
+
+Y quizá no exista una imagen más hermosa: algo delicado que, aun en medio del viento, encuentra la manera de seguir cantando.`
+},
+{
+title:'Defender la alegría',
+author:'Mario Benedetti',
+quote:'«Defender la alegría como un derecho».',
+source:'Defensa de la alegría.',
+html:`Hay una extraña costumbre de pensar que la alegría debe justificarse.
+
+Como si para sonreír necesitáramos tener todos los problemas resueltos, como si disfrutar de un instante fuera olvidar las responsabilidades o ignorar las dificultades.
+
+Pero la alegría también merece un espacio en los días imperfectos.
+
+Está en una canción que aparece en el momento indicado, en una conversación inesperada, en una risa que llega cuando menos la esperábamos.
+
+No siempre podemos elegir lo que sucede a nuestro alrededor, pero quizá podamos aprender a no renunciar a esos pequeños momentos que nos recuerdan por qué vale la pena estar aquí.
+
+La alegría no necesita que la vida sea perfecta para tener derecho a existir.`
+},
+{
+title:'La inmensidad de ser uno mismo',
+author:'Walt Whitman',
+quote:'«Soy inmenso, contengo multitudes».',
+source:'Traducción propia de “I am large, I contain multitudes”, de Song of Myself.',
+html:`Dentro de una persona pueden convivir muchas versiones de sí misma.
+
+La que ríe sin medida y la que necesita silencio. La que se siente valiente y la que duda. La que sueña con recorrer el mundo y la que encuentra felicidad en quedarse un rato más en casa.
+
+No somos una sola emoción, una sola historia ni una única manera de pensar.
+
+Cambiar no significa traicionarnos. A veces significa permitir que todas esas partes encuentren su lugar.
+
+Qué injusto sería exigirnos ser siempre iguales cuando la vida entera está hecha de transformaciones.
+
+Somos una colección de momentos, contradicciones, aprendizajes y posibilidades. Y en esa diversidad también habita nuestra belleza.`
+},
+{
+title:'El arte de mirar de nuevo',
+author:'Rabindranath Tagore',
+quote:'«La fe es el pájaro que siente la luz y canta cuando el amanecer todavía está oscuro».',
+source:'Traducción propia de Fireflies (1928).',
+html:`Hay cosas que solo pueden descubrirse cuando aprendemos a mirar de otra manera.
+
+El mismo cielo puede parecer inmenso o distante. Una misma despedida puede sentirse como una pérdida o como el comienzo de algo desconocido.
+
+No porque la realidad cambie necesariamente, sino porque nuestra mirada también forma parte de aquello que vivimos.
+
+Quizá la fe de la que habla Tagore no consista en tener todas las certezas, sino en conservar la capacidad de reconocer la luz incluso cuando todavía no podemos verla por completo.
+
+A veces, basta con escuchar ese pequeño canto interior que nos recuerda que no todo está terminado.`
+},
+{
+title:'La amistad como un lugar',
+author:'Khalil Gibran',
+quote:'«Vuestro amigo es la respuesta a vuestras necesidades».',
+source:'Traducción propia de una frase de El profeta, “Sobre la amistad”.',
+html:`Existen amistades que no necesitan ocupar todos los días para tener un lugar importante.
+
+Algunas viven entre mensajes, otras entre encuentros ocasionales y unas cuantas sobreviven a las distancias que el tiempo coloca en medio.
+
+Lo bonito es que no todas necesitan demostrarse constantemente.
+
+Hay personas con quienes podemos retomar una conversación como si el reloj hubiera decidido detenerse. Personas que nos recuerdan que la cercanía no siempre se mide en kilómetros ni en horas compartidas.
+
+Tal vez una amistad sea precisamente eso: encontrar a alguien con quien el mundo parece un poco menos extraño.`
+},
+{
+title:'Tener paciencia con lo que somos',
+author:'Rainer Maria Rilke',
+quote:'«Ten paciencia con todo lo que no está resuelto en tu corazón».',
+source:'Traducción propia de una frase de Cartas a un joven poeta.',
+html:`No todas las preguntas necesitan una respuesta inmediata.
+
+Hay sentimientos que tardan en encontrar un nombre, decisiones que necesitan tiempo y etapas de nuestra vida que solo comprendemos cuando ya han quedado atrás.
+
+A veces nos exigimos entenderlo todo demasiado pronto.
+
+Queremos saber hacia dónde vamos, qué significa lo que sentimos y cuándo llegará aquello que esperamos. Sin embargo, algunas respuestas no aparecen por buscarlas con más fuerza.
+
+Llegan cuando hemos vivido lo suficiente para comprenderlas.
+
+No hay nada malo en estar descubriéndose todavía. Somos una historia en movimiento, y no todas las páginas tienen que estar escritas al mismo tiempo.`
+},
+{
+title:'El universo que guarda un recuerdo',
+author:'Jorge Luis Borges',
+quote:'«El tiempo es la sustancia de que estoy hecho».',
+source:'Nueva refutación del tiempo.',
+html:`El tiempo tiene una manera extraña de transformar las cosas.
+
+Un lugar que ayer parecía cotidiano puede convertirse en un recuerdo precioso. Una conversación breve puede regresar a nuestra memoria años después. Una persona que conocimos por casualidad puede terminar formando parte de una etapa que jamás olvidaremos.
+
+Quizá por eso los recuerdos son tan especiales: no conservan únicamente lo que sucedió, sino también una parte de quienes éramos cuando sucedió.
+
+Y aunque no podemos regresar a esos instantes, sí podemos llevarlos con nosotros.
+
+Al final, nuestra historia también está hecha de esos pequeños fragmentos que el tiempo no consiguió llevarse.`
+},
+{
+title:'La belleza de lo que permanece',
+author:'Pablo Neruda',
+quote:'«Quiero hacer contigo lo que la primavera hace con los cerezos».',
+source:'Poema 14, Veinte poemas de amor y una canción desesperada.',
+html:`La primavera no obliga a las flores a abrirse. Simplemente llega, y cada árbol responde a su manera.
+
+Hay encuentros que se parecen a eso.
+
+Personas que llegan sin anunciarse y, sin proponérselo, despiertan conversaciones, sonrisas o pensamientos que antes no estaban allí.
+
+No todos los encuentros están destinados a convertirse en historias largas. Algunos solo vienen a recordarnos que todavía existen cosas capaces de sorprendernos.
+
+Y quizá su valor no dependa de cuánto duren, sino de aquello bonito que dejan mientras suceden.`
+},
+{
+title:'No todo lo valioso hace ruido',
+author:'Henry David Thoreau',
+quote:'«El costo de una cosa es la cantidad de vida que requiere intercambiarse por ella, de inmediato o a largo plazo».',
+source:'Traducción propia de Walden, capítulo I, “Economía”.',
+html:`Vivimos rodeados de cosas que parecen medir nuestro valor: lo que conseguimos, lo que mostramos, los lugares a los que llegamos y las metas que alcanzamos.
+
+Pero hay riquezas que no caben en una fotografía.
+
+Una tarde tranquila, una amistad sincera, una página que nos conmueve o la libertad de disfrutar algo sin tener que compartirlo con nadie.
+
+No todo lo importante necesita ser visible.
+
+Quizá una vida valiosa no sea aquella que acumula más cosas, sino aquella en la que todavía encontramos motivos para detenernos y apreciar lo que ya está frente a nosotros.`
+},
+{
+title:'La libertad de ser',
+author:'Virginia Woolf',
+quote:'«No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente».',
+source:'Traducción propia de Una habitación propia.',
+html:`Existe un territorio que nadie puede recorrer exactamente como nosotros: el mundo que llevamos dentro.
+
+Allí viven nuestras ideas, nuestros gustos, nuestras preguntas y esas pequeñas fantasías que a veces guardamos para nosotros mismos.
+
+Ser libre también significa conservar ese espacio.
+
+No permitir que las expectativas ajenas decidan por completo quiénes debemos ser. No sentir que tenemos que encajar en todas partes ni explicar cada una de nuestras elecciones.
+
+Hay una tranquilidad especial en descubrir que podemos construir nuestra propia manera de mirar el mundo.
+
+Y que, incluso cuando todo alrededor cambia, nuestra voz interior sigue siendo nuestra.`
+},
+{
+title:'La vida no siempre se explica',
+author:'Antoine de Saint-Exupéry',
+quote:'«Lo esencial es invisible a los ojos».',
+source:'El principito.',
+html:`Hay cosas que no pueden medirse ni describirse con facilidad.
+
+El valor de una palabra en el momento indicado, la tranquilidad que transmite una persona o la emoción que aparece al recordar algo que parecía insignificante.
+
+Quizá por eso algunas de las experiencias más importantes de la vida resultan tan difíciles de explicar.
+
+Podemos intentar describirlas, buscar las palabras exactas o compararlas con otras cosas, pero siempre queda algo que solo puede comprenderse al sentirlo.
+
+Tal vez aprender a vivir también consista en prestar atención a aquello que no necesita ser visto para ser verdadero.`
+},
+{
+title:'La vida como una obra inacabada',
+author:'Hermann Hesse',
+quote:'«Para que pueda surgir lo posible, es preciso intentar una y otra vez lo imposible».',
+source:'Traducción propia de una carta a Wilhelm Gundert, septiembre de 1960.',
+html:`Hay sueños que parecen demasiado grandes cuando los miramos desde el lugar en el que estamos.
+
+Otros cambian de forma con los años, y algunos terminan convirtiéndose en algo que nunca habíamos imaginado.
+
+Pero quizá esa sea una de las partes más interesantes de vivir: descubrir que todavía hay mucho que no conocemos de nosotros mismos.
+
+No tenemos que llegar a todas partes ni convertir cada deseo en una meta cumplida.
+
+A veces basta con conservar la curiosidad, permitirnos imaginar y no cerrar las puertas a las posibilidades que todavía no han llamado.
+
+La historia sigue escribiéndose mientras tengamos algo por descubrir.`
+},
+{
+title:'Beatriz, más allá de las páginas',
+html:`Hay nombres que son mucho más que una manera de llamar a alguien.
+
+Detrás de cada uno existe una historia que comenzó mucho antes de que otros pudieran conocerla. Hay recuerdos que nadie más vivió, sueños que todavía esperan su momento, pequeñas victorias que quizá pasaron inadvertidas y capítulos que solo su protagonista conoce por completo.
+
+Beatriz es uno de esos nombres.
+
+Y aunque estas páginas no podrían contar todo lo que hay detrás de él, sí pueden guardar un deseo: que nunca pierdas la curiosidad por descubrir todo lo que todavía puedes llegar a ser.
+
+Que sigas encontrando motivos para reír, lugares que despierten tu imaginación, historias que te hagan olvidar el reloj y personas con quienes puedas compartir un pedacito de tu mundo.
+
+Que nunca sientas que debes convertirte en alguien distinto para merecer cosas bonitas.
+
+Y que, cuando mires hacia atrás, puedas reconocer no solamente los lugares a los que llegaste, sino también todo lo que tuviste que atravesar para llegar hasta allí.
+
+Porque todavía quedan páginas que nadie ha leído.
+
+Y eso, Betty, también es una hermosa noticia.`
+},
+{
+title:'Una carta para Betty',
+html:`Betty:
+
+No quería dejar pasar tu cumpleaños sin regalarte algo diferente.
+
+Sé que no siempre tenemos la oportunidad de conversar o compartir tanto como quisiéramos, pero eso no cambia el cariño ni el aprecio que te tengo. Has sido una buena amiga y me pareció bonito dedicarte algo que pudieras conservar más allá de un mensaje de felicitación.
+
+Por eso nació este pequeño libro.
+
+No sé cuál de todas estas páginas terminará gustándote más, ni si alguna frase llegará justo en el momento en que la necesites. Pero me haría mucha ilusión que, de vez en cuando, regresaras a él y encontraras alguna palabra que te acompañe.
+
+Quiero desearte un cumpleaños muy bonito, lleno de momentos que te hagan sonreír y de personas que te recuerden lo valiosa que eres.
+
+Espero que este nuevo año te acerque a muchas de las cosas que deseas, que te permita conocer nuevos lugares, vivir experiencias inolvidables y seguir disfrutando de todo aquello que te hace feliz.
+
+Gracias por tu amistad y por esos pequeños momentos que, aunque parezcan sencillos, también forman parte de los buenos recuerdos.
+
+Con mucho cariño,
+
+Joaquín.`
+},
+{
+title:'Ahora te toca escribir a ti',
+html:`Y ahora, Betty…
+
+Hasta aquí llegan las palabras que quise regalarte, pero no quisiera que este fuera el final de tu libro.
+
+Me gustaría que, a partir de aquí, comenzaras uno propio.
+
+Uno donde puedas guardar tus aventuras, tus risas, los momentos tristes, los días felices y todas esas pequeñas cosas que, por alguna razón, terminan convirtiéndose en parte de nosotros.
+
+Escribe sobre los lugares que sueñas conocer, las personas que te han marcado, las cosas que te hacen reír sin explicación y esos pensamientos que a veces no encuentras la manera de decir en voz alta, pero que quizá puedas dejar sobre el papel.
+
+No necesitas escribir bonito, utilizar palabras extraordinarias ni construir una historia perfecta.
+
+Puedes escribir una sola línea, una página entera o simplemente una palabra que quieras recordar.
+
+No importa si algunas páginas hablan de felicidad y otras de días que preferirías olvidar. Todas tienen algo que contar.
+
+Porque tu historia no necesita parecerse a ninguna otra.`,
+closing:'Solamente necesita ser tuya.'
+},
+{
+title:'Las siguientes páginas te pertenecen',
+html:`Un nuevo año. Nuevos recuerdos. Nuevas aventuras. Infinitas posibilidades.
+
+Que nunca te falten motivos para escribir una nueva página.
+
+Que haya días que merezcan ser contados, lugares que te dejen sin palabras, personas que se conviertan en buenos recuerdos y sueños que te hagan mirar hacia adelante con ilusión.
+
+Y si alguna vez no sabes qué escribir, recuerda que incluso los días aparentemente ordinarios pueden esconder historias extraordinarias.
+
+Este libro termina aquí, pero el tuyo apenas continúa.`,
+closing:`Feliz cumpleaños, Betty.
+
+Que la vida te regale muchas historias dignas de ser contadas.
+
+Con cariño, Joaquín.
+
+Las siguientes páginas te pertenecen.`
+}
+];
+let index=0;
+let busy=false;
+
+const content=document.getElementById('pageContent');
+const page=document.getElementById('page');
+const counter=document.getElementById('counter');
+const prev=document.getElementById('prev');
+const next=document.getElementById('next');
+const progressFill=document.getElementById('progressFill');
+const scrollFade=document.getElementById('scrollFade');
+const scrollHint=document.getElementById('scrollHint');
+const tapLeft=document.getElementById('tapLeft');
+const tapRight=document.getElementById('tapRight');
+
+function updateScrollCue(){
+  const inner=content.querySelector('.page-inner');
+  if(!inner){
+    scrollFade.classList.remove('visible');
+    scrollHint.classList.remove('visible');
+    return;
+  }
+  const hasMoreBelow=inner.scrollHeight - inner.scrollTop - inner.clientHeight > 18;
+  scrollFade.classList.toggle('visible',hasMoreBelow);
+  scrollHint.classList.toggle('visible',hasMoreBelow && inner.scrollTop < 12);
+}
+
+function render(){
+  const p=pages[index];
+  let html='';
+
+  if(p.type==='cover'){
+    html=`
+      <div class="page-inner cover">
+        ${p.html}
+        <div class="page-no">01</div>
+      </div>`;
+  }else{
+    html=`
+      <div class="page-inner">
+        ${swan.replace('class="swan"','class="swan small"')}
+        <div class="kicker">Entre plumas y pensamientos</div>
+        <h2>${p.title}</h2>
+
+        ${p.quote ? `
+          <div class="quote-wrap">
+            <blockquote class="quote">${p.quote}</blockquote>
+            <div class="author">${p.author}</div>
+            <div class="source">${p.source}</div>
+          </div>
+          <div class="ornament"></div>
+          <div class="reflection-label">
+            Una reflexión a partir de estas palabras
+          </div>
+        ` : '<div class="ornament"></div>'}
+
+        <div class="bodycopy">
+          ${p.html.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+        </div>
+
+        ${p.closing ? `
+          <div class="closing">
+            ${p.closing.replace(/\n/g,'<br>')}
+          </div>
+        ` : ''}
+
+        <div class="page-no">
+          ${String(index+1).padStart(2,'0')}
+        </div>
+      </div>`;
+  }
+
+  content.innerHTML=html;
+
+  const inner=content.querySelector('.page-inner');
+  if(inner){
+    inner.scrollTop=0;
+    inner.addEventListener('scroll',updateScrollCue,{passive:true});
+  }
+
+  counter.textContent=
+    `${String(index+1).padStart(2,'0')} / ${String(pages.length).padStart(2,'0')}`;
+
+  if(progressFill){
+    progressFill.style.width=`${((index+1)/pages.length)*100}%`;
+  }
+
+  prev.disabled=index===0;
+  next.disabled=index===pages.length-1;
+
+  requestAnimationFrame(updateScrollCue);
+}
+
+function turn(dir){
+  if(busy)return;
+
+  const target=index+dir;
+
+  if(target<0 || target>=pages.length)return;
+
+  busy=true;
+
+  if(dir>0){
+    page.classList.add('turn');
+
+    setTimeout(()=>{
+      index=target;
+      page.classList.remove('turn');
+      render();
+      busy=false;
+    },650);
+
+  }else{
+    index=target;
+    render();
+
+    page.style.transform='rotateY(12deg)';
+
+    requestAnimationFrame(()=>{
+      page.style.transform='';
+      busy=false;
+    });
+  }
+}
+
+prev.addEventListener('click',()=>turn(-1));
+next.addEventListener('click',()=>turn(1));
+tapLeft.addEventListener('click',()=>turn(-1));
+tapRight.addEventListener('click',()=>turn(1));
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')turn(1);
+  if(e.key==='ArrowLeft')turn(-1);
+});
+
+window.addEventListener('resize',updateScrollCue,{passive:true});
+
+/* Gestos táctiles (Swipe) optimizados para móvil sin bloquear el scroll vertical */
+let touchStartX=0;
+let touchStartY=0;
+let touchStartTime=0;
+const bookEl=document.getElementById('book');
+
+bookEl.addEventListener('touchstart',e=>{
+  if(e.touches.length!==1)return;
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+  touchStartTime=Date.now();
+},{passive:true});
+
+bookEl.addEventListener('touchend',e=>{
+  if(!touchStartTime || e.changedTouches.length!==1)return;
+  const dx=e.changedTouches[0].clientX - touchStartX;
+  const dy=e.changedTouches[0].clientY - touchStartY;
+  const dt=Date.now() - touchStartTime;
+  touchStartTime=0;
+
+  /* Solo dispara cambio de página si el movimiento es claramente horizontal */
+  if(dt<650 && Math.abs(dx)>46 && Math.abs(dx)>Math.abs(dy)*1.45){
+    if(dx<0){
+      turn(1);
+    }else{
+      turn(-1);
+    }
+  }
+},{passive:true});
+
+render();
+
+/* Descarga de archivos (.html offline y .txt limpio) */
+const saveBtn=document.getElementById('saveBtn');
+const saveMenu=document.getElementById('saveMenu');
+const downloadHtmlBtn=document.getElementById('downloadHtml');
+const downloadTxtBtn=document.getElementById('downloadTxt');
+
+function triggerDownload(blob,filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },250);
+}
+
+saveBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  const isOpen=saveMenu.classList.toggle('open');
+  saveBtn.setAttribute('aria-expanded',String(isOpen));
+});
+
+document.addEventListener('click',e=>{
+  if(!saveMenu.contains(e.target) && e.target!==saveBtn){
+    saveMenu.classList.remove('open');
+    saveBtn.setAttribute('aria-expanded','false');
+  }
+});
+
+downloadHtmlBtn.addEventListener('click',()=>{
+  saveMenu.classList.remove('open');
+  saveBtn.setAttribute('aria-expanded','false');
+
+  /* Clona el documento limpio para guardarlo en su estado inicial */
+  const clone=document.documentElement.cloneNode(true);
+  const cloneMenu=clone.querySelector('#saveMenu');
+  if(cloneMenu)cloneMenu.classList.remove('open');
+  const cloneMusic=clone.querySelector('#music');
+  if(cloneMusic){
+    cloneMusic.textContent='♫ Música: apagada';
+    cloneMusic.setAttribute('aria-pressed','false');
+  }
+
+  const fullHtml='<!doctype html>\n'+clone.outerHTML;
+  const blob=new Blob([fullHtml],{type:'text/html;charset=utf-8'});
+  triggerDownload(blob,'Entre_plumas_y_pensamientos_Para_Betty.html');
+});
+
+downloadTxtBtn.addEventListener('click',()=>{
+  saveMenu.classList.remove('open');
+  saveBtn.setAttribute('aria-expanded','false');
+
+  const lines=[
+    'ENTRE PLUMAS Y PENSAMIENTOS',
+    'Para Beatriz, Betty',
+    'Un pequeño refugio de palabras',
+    '==================================================\n'
+  ];
+
+  pages.forEach((p,idx)=>{
+    if(p.type==='cover'){
+      lines.push('Hay palabras que no buscan ser leídas una sola vez, sino encontrar un lugar al que regresar.\n');
+      return;
+    }
+    lines.push(`— ${String(idx+1).padStart(2,'0')}. ${p.title.toUpperCase()} —\n`);
+    if(p.quote){
+      lines.push(`${p.quote}`);
+      lines.push(`— ${p.author} (${p.source})\n`);
+    }
+    lines.push(p.html.trim());
+    if(p.closing){
+      lines.push('\n' + p.closing.trim());
+    }
+    lines.push('\n--------------------------------------------------\n');
+  });
+
+  lines.push('Hecho con cariño · Para Betty');
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  triggerDownload(blob,'Entre_plumas_y_pensamientos_Para_Betty.txt');
+});
+
+/* Música ambiental: comienza únicamente cuando el lector la activa (compatible con iOS/Android). */
+
+let audioCtx=null;
+let oscillators=[];
+let gain=null;
+let musicOn=false;
+
+const musicBtn=document.getElementById('music');
+
+function startMusic(){
+  const AC=window.AudioContext||window.webkitAudioContext;
+
+  if(!AC)return;
+
+  audioCtx=new AC();
+  if(audioCtx.state==='suspended'){
+    audioCtx.resume();
+  }
+
+  gain=audioCtx.createGain();
+  gain.gain.value=.0001;
+  gain.connect(audioCtx.destination);
+
+  const notes=[196,246.94,293.66,369.99];
+
+  notes.forEach((f,i)=>{
+    const o=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+
+    o.type='sine';
+    o.frequency.value=f;
+
+    g.gain.value=[.12,.07,.045,.025][i];
+
+    o.connect(g);
+    g.connect(gain);
+    o.start();
+
+    oscillators.push(o);
+  });
+
+  gain.gain.setTargetAtTime(
+    .035,
+    audioCtx.currentTime,
+    1.5
+  );
+
+  musicOn=true;
+  musicBtn.textContent='♫ Música: encendida';
+  musicBtn.setAttribute('aria-pressed','true');
+}
+
+function stopMusic(){
+  if(!audioCtx)return;
+
+  gain.gain.setTargetAtTime(
+    .0001,
+    audioCtx.currentTime,
+    .5
+  );
+
+  setTimeout(()=>{
+    oscillators.forEach(o=>{
+      try{o.stop()}catch(e){}
+    });
+
+    oscillators=[];
+    audioCtx.close();
+    audioCtx=null;
+  },1800);
+
+  musicOn=false;
+  musicBtn.textContent='♫ Música: apagada';
+  musicBtn.setAttribute('aria-pressed','false');
+}
+
+musicBtn.addEventListener('click',()=>{
+  if(musicOn){
+    stopMusic();
+  }else{
+    startMusic();
+  }
+});
+</script>
+
+</body></html>
